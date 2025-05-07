@@ -10,6 +10,10 @@ spring:
     url: jdbc:mysql://localhost:3306/picture
     username: root
     password:
+  # 开放更大的文件上传体积
+  servlet:
+    multipart:
+      max-file-size: 10MB
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: false
@@ -36,3 +40,6 @@ knife4j:
   enable: true
   setting:
     language: zh_cn
+
+
+
