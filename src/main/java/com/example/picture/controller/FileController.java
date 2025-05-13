@@ -11,14 +11,12 @@ import com.example.picture.exception.BusinessException;
 import com.example.picture.exception.ErrorCode;
 import com.example.picture.exception.ThrowUtils;
 import com.example.picture.manager.CosManager;
-import com.example.picture.model.dto.picture.PictureEditRequest;
-import com.example.picture.model.dto.picture.PictureQueryRequest;
-import com.example.picture.model.dto.picture.PictureUpdateRequest;
-import com.example.picture.model.dto.picture.PictureUploadRequest;
+import com.example.picture.model.dto.picture.*;
 import com.example.picture.model.entity.Picture;
 import com.example.picture.model.entity.PictureTagCategory;
 import com.example.picture.model.entity.PictureVO;
 import com.example.picture.model.entity.User;
+import com.example.picture.model.enums.PictureReviewStatusEnum;
 import com.example.picture.service.PictureService;
 import com.example.picture.service.UserService;
 import com.qcloud.cos.model.COSObject;
@@ -109,8 +107,7 @@ public class FileController {
     /**
      * 上传图片（可重新上传）
      */
-    @PostMapping(value = "/upload",consumes =  MediaType.MULTIPART_FORM_DATA_VALUE)
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public BaseResponse<PictureVO> uploadPicture(
             @RequestPart("file") MultipartFile multipartFile,
             PictureUploadRequest pictureUploadRequest,
@@ -119,6 +116,30 @@ public class FileController {
         PictureVO pictureVO = pictureService.uploadPicture(multipartFile, pictureUploadRequest, loginUser);
         return ResultUtils.success(pictureVO);
     }
+    /**
+     * 通过 URL 上传图片（可重新上传）
+     */
+    @PostMapping("/upload/url")
+    public BaseResponse<PictureVO> uploadPictureByUrl(
+            @RequestBody PictureUploadRequest pictureUploadRequest,
+            HttpServletRequest request) {
+        User loginUser = userService.getLoginUser(request);
+        String fileUrl = pictureUploadRequest.getFileUrl();
+        PictureVO pictureVO = pictureService.uploadPicture(fileUrl, pictureUploadRequest, loginUser);
+        return ResultUtils.success(pictureVO);
+    }
+    @PostMapping("/upload/batch")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    public BaseResponse<Integer> uploadPictureByBatch(
+            @RequestBody PictureUploadByBatchRequest pictureUploadByBatchRequest,
+            HttpServletRequest request
+    ) {
+        ThrowUtils.throwIf(pictureUploadByBatchRequest == null, ErrorCode.PARAMS_ERROR);
+        User loginUser = userService.getLoginUser(request);
+        int uploadCount = pictureService.uploadPictureByBatch(pictureUploadByBatchRequest, loginUser);
+        return ResultUtils.success(uploadCount);
+    }
+
     /**
      * 删除图片
      */
@@ -216,6 +237,7 @@ public class FileController {
     public BaseResponse<Page<PictureVO>> listPictureVOByPage(@RequestBody PictureQueryRequest pictureQueryRequest,
                                                              HttpServletRequest request) {
         long current = pictureQueryRequest.getCurrent();
+        pictureQueryRequest.setReviewStatus(PictureReviewStatusEnum.PASS.getValue());
         long size = pictureQueryRequest.getPageSize();
         // 限制爬虫
         ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
@@ -257,6 +279,7 @@ public class FileController {
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         return ResultUtils.success(true);
     }
+
     @GetMapping("/tag_category")
     public BaseResponse<PictureTagCategory> listPictureTagCategory() {
         PictureTagCategory pictureTagCategory = new PictureTagCategory();
@@ -265,6 +288,16 @@ public class FileController {
         pictureTagCategory.setTagList(tagList);
         pictureTagCategory.setCategoryList(categoryList);
         return ResultUtils.success(pictureTagCategory);
+    }
+
+    @PostMapping("/review")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    public BaseResponse<Boolean> doPictureReview(@RequestBody PictureReviewRequest pictureReviewRequest,
+                                                 HttpServletRequest request) {
+        ThrowUtils.throwIf(pictureReviewRequest == null, ErrorCode.PARAMS_ERROR);
+        User loginUser = userService.getLoginUser(request);
+        pictureService.doPictureReview(pictureReviewRequest, loginUser);
+        return ResultUtils.success(true);
     }
 
 

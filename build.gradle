@@ -42,6 +42,8 @@ dependencies {
     implementation 'com.baomidou:mybatis-plus-boot-starter:3.5.5'
 
     implementation 'com.qcloud:cos_api:+'
+//    jsoup
+    implementation 'org.jsoup:jsoup:1.15.4'
 }
 
 tasks.named('test') {
