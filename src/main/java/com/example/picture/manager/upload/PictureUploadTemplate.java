@@ -9,13 +9,17 @@ import com.example.picture.exception.BusinessException;
 import com.example.picture.exception.ErrorCode;
 import com.example.picture.manager.CosManager;
 import com.example.picture.model.dto.picture.UploadPictureResult;
+import com.qcloud.cos.model.PutObjectRequest;
 import com.qcloud.cos.model.PutObjectResult;
 import com.qcloud.cos.model.ciModel.persistence.ImageInfo;
+import com.qcloud.cos.model.ciModel.persistence.PicOperations;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Slf4j
 public abstract class PictureUploadTemplate {  
@@ -41,27 +45,27 @@ public abstract class PictureUploadTemplate {
         String uploadPath = String.format("/%s/%s", uploadPathPrefix, uploadFilename);  
   
         File file = null;
-        try {  
-            // 3. 创建临时文件  
-            file = File.createTempFile(uploadPath, null);  
-            // 处理文件来源（本地或 URL）  
-            processFile(inputSource, file);  
-  
-            // 4. 上传图片到对象存储  
+        try {
+            // 3. 创建临时文件
+            file = File.createTempFile(uploadPath, null);
+            // 处理文件来源（本地或 URL）
+            processFile(inputSource, file);
+
+            // 4. 上传图片到对象存储
             PutObjectResult putObjectResult = cosManager.putPictureObject(uploadPath, file);
             ImageInfo imageInfo = putObjectResult.getCiUploadResult().getOriginalInfo().getImageInfo();
-  
-            // 5. 封装返回结果  
-            return buildResult(originFilename, file, uploadPath, imageInfo);  
-        } catch (Exception e) {  
-            log.error("图片上传到对象存储失败", e);  
+
+            // 5. 封装返回结果
+            return buildResult(originFilename, file, uploadPath, imageInfo);
+        } catch (Exception e) {
+            log.error("图片上传到对象存储失败", e);
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "上传失败");
-        } finally {  
+        } finally {
             // 6. 清理临时文件  
             deleteTempFile(file);  
         }  
-    }  
-  
+    }
+
     /**  
      * 校验输入源（本地文件或 URL）  
      */  
@@ -106,5 +110,8 @@ public abstract class PictureUploadTemplate {
         if (!deleteResult) {  
             log.error("file delete error, filepath = {}", file.getAbsolutePath());  
         }  
-    }  
+    }
+
+
+
 }

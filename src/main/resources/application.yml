@@ -2,6 +2,9 @@ server:
   port: 8123
   servlet:
     context-path: /api
+    session:
+      cookie:
+        max-age: 2592000
 
   # 数据库配置
 spring:
@@ -14,6 +17,21 @@ spring:
   servlet:
     multipart:
       max-file-size: 10MB
+  session:
+    redis:
+      namespace: spring:session
+      flush-mode: on_save
+      save-mode: always
+      repository-type: indexed
+  #    redis:
+#      repository-type: default
+  data:
+    redis:
+      timeout: 5000
+      port: 6379
+      host: localhost
+      database: 0
+
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: false
@@ -40,6 +58,7 @@ knife4j:
   enable: true
   setting:
     language: zh_cn
+
 
 
 

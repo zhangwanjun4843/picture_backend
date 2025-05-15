@@ -44,6 +44,12 @@ dependencies {
     implementation 'com.qcloud:cos_api:+'
 //    jsoup
     implementation 'org.jsoup:jsoup:1.15.4'
+    // redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    // caffeine
+    implementation 'com.github.ben-manes.caffeine:caffeine:+'
+    // session redis
+    implementation 'org.springframework.session:spring-session-data-redis'
 }
 
 tasks.named('test') {

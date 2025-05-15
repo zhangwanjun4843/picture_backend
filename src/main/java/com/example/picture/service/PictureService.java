@@ -3,10 +3,7 @@ package com.example.picture.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.example.picture.model.dto.picture.PictureQueryRequest;
-import com.example.picture.model.dto.picture.PictureReviewRequest;
-import com.example.picture.model.dto.picture.PictureUploadByBatchRequest;
-import com.example.picture.model.dto.picture.PictureUploadRequest;
+import com.example.picture.model.dto.picture.*;
 import com.example.picture.model.entity.Picture;
 import com.example.picture.model.entity.PictureVO;
 import com.example.picture.model.entity.User;
@@ -18,6 +15,12 @@ public interface PictureService extends IService<Picture> {
 
     // 上传图片
     PictureVO uploadPicture(Object inputSource, PictureUploadRequest pictureUploadRequest, User loginUser);
+
+    void editPicture(PictureEditRequest pictureEditRequest, User loginUser);
+
+    void checkPictureAuth(User loginUser, Picture picture);
+
+    void deletePicture(long pictureId, User loginUser);
 
     QueryWrapper<Picture> getQueryWrapper(PictureQueryRequest pictureQueryRequest);
 
